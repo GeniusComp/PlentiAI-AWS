@@ -40,3 +40,37 @@ resource "aws_s3_bucket_public_access_block" "plenty_ai_data" {
   ignore_public_acls      = true
   restrict_public_buckets = true
 }
+
+resource "aws_s3_bucket" "plenty_ai_logs" {
+  bucket = "plenty-ai-logs-283224254536"
+
+  tags = {
+    Name        = "plenty-ai-logs"
+    Environment = "production"
+    Project     = "PlentyAI"
+    ManagedBy   = "Terraform"
+  }
+}
+
+resource "aws_s3_bucket_public_access_block" "plenty_ai_logs" {
+  bucket = aws_s3_bucket.plenty_ai_logs.id
+
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
+}
+
+resource "aws_s3_bucket_versioning" "plenty_ai_data" {
+  bucket = aws_s3_bucket.plenty_ai_data.id
+
+  versioning_configuration {
+    status = "Enabled"
+  }
+}
+
+resource "aws_s3_bucket_logging" "plenty_ai_data" {
+  bucket        = aws_s3_bucket.plenty_ai_data.id
+  target_bucket = aws_s3_bucket.plenty_ai_logs.id
+  target_prefix = "s3-access-logs/"
+}
